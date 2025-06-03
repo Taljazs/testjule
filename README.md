@@ -11,6 +11,7 @@ A Python command-line tool to transcribe local audio files into SRT (.srt) or We
 -   Clear command-line interface.
 -   Robust error handling, especially for batch operations.
 -   Includes a self-generating silent dummy audio file for quick testing.
+-   Defaults to using Deepgram's "nova-2" model for transcription.
 
 ## Requirements
 

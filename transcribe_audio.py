@@ -22,8 +22,8 @@ def transcribe_audio_local(api_key: str, audio_file_path: str) -> Any | None: # 
         with open(audio_file_path, "rb") as audio_file:
             payload_data = audio_file.read()
         payload = {'buffer': payload_data}
-        options = PrerecordedOptions(smart_format=True, utterances=True, language="en")
-        
+        options = PrerecordedOptions(model="nova-2", smart_format=True, utterances=True, language="en")
+
         print(f"Sending audio data from '{audio_file_path}' to Deepgram for transcription...")
         # Updated to use listen.rest as per deprecation warning
         response = deepgram.listen.rest.v("1").transcribe_file(payload, options, timeout=300)
@@ -49,7 +49,7 @@ def transcribe_audio_local(api_key: str, audio_file_path: str) -> Any | None: # 
 
 def save_caption_file(
     transcription_response: Any, # Changed type hint to Any
-    input_audio_path: str, 
+    input_audio_path: str,
     output_format: str,
     output_file_path: str | None = None
 ) -> bool:
@@ -71,7 +71,7 @@ def save_caption_file(
     else:
         base, _ = os.path.splitext(input_audio_path)
         output_filename_final = f"{base}.{output_format.lower()}"
-    
+
     caption_content = ""
     print(f"Preparing to save caption file in {output_format.upper()} format to: {output_filename_final}")
 
@@ -128,7 +128,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    
+
     print(f"--- Starting Transcription Process for {len(args.audio_file)} file(s) ---")
     if args.api_key == "11744f05947dfaa404d823bfb6fec6f29284704b":
         print("INFO: Using default/placeholder API Key. For real use, provide your own via --api_key or DEEPGRAM_API_KEY env var.")
@@ -142,7 +142,7 @@ if __name__ == "__main__":
 
     for i, input_path in enumerate(args.audio_file):
         print(f"\n--- Processing file {i+1} of {len(args.audio_file)}: {input_path} ---")
-        
+
         current_file_output_path = None
         if len(args.audio_file) == 1: # Only use args.output if single file
             current_file_output_path = args.output
@@ -165,17 +165,17 @@ if __name__ == "__main__":
                     print(f"Error creating dummy audio file '{input_path}': {e_wave}. Skipping this file.")
                     files_failed += 1
                     continue # Skip to next file
-            
+
             transcription_response_obj = transcribe_audio_local(args.api_key, input_path)
 
             if transcription_response_obj:
                 print(f"Transcription completed for '{input_path}'. Proceeding to save caption file.")
-                
+
                 saved_successfully = save_caption_file(
-                    transcription_response_obj, 
-                    input_path, 
+                    transcription_response_obj,
+                    input_path,
                     args.format, # Already lowercased
-                    current_file_output_path 
+                    current_file_output_path
                 )
                 if saved_successfully:
                     files_processed_successfully += 1
@@ -185,7 +185,7 @@ if __name__ == "__main__":
             else:
                 print(f"Transcription failed for '{input_path}'. Cannot save captions.")
                 files_failed += 1
-        
+
         except Exception as e_file_processing: # Catch unexpected errors during single file processing
             print(f"An unexpected error occurred while processing file '{input_path}': {e_file_processing}")
             files_failed += 1
@@ -195,7 +195,7 @@ if __name__ == "__main__":
     print(f"Total files attempted: {len(args.audio_file)}")
     print(f"Successfully processed: {files_processed_successfully}")
     print(f"Failed to process: {files_failed}")
-    
+
     if files_failed > 0:
         print("--- Process Completed with Errors ---")
         exit(1)
