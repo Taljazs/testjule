@@ -11,6 +11,7 @@ A Python command-line tool to transcribe local audio files into SRT (.srt) or We
 -   Clear command-line interface.
 -   Robust error handling, especially for batch operations.
 -   Includes a self-generating silent dummy audio file for quick testing.
+-   Defaults to using Deepgram's "nova-2" model for transcription.
 
 ## Requirements
 
@@ -57,6 +58,10 @@ python transcribe_audio.py [options] <audio_file_path(s)>
     *   **Single input file**: If provided, the caption file is saved to this path.
     *   **Multiple input files**: This argument is ignored if provided. Output files will be saved in the same directories as their respective input audio files, with the chosen format extension.
 *   `-k, --api_key <your_api_key>`: (Optional) Your Deepgram API Key. Overrides the `DEEPGRAM_API_KEY` environment variable if set.
+*   `--paragraphs`: (Optional, flag) Enable paragraph segmentation. Captions will be based on Deepgram's sentence splits within identified paragraphs. When this option is used, `--max_caption_chars` and `--split_on_sentences` are IGNORED. 启用段落分割，字幕将基于段落中的句子进行分割。启用此选项后，`--max_caption_chars` 和 `--split_on_sentences` 将被忽略。
+*   `--diarize`: (Optional, flag) Enable speaker diarization. This identifies different speakers. It may also influence how paragraphs are segmented if `--paragraphs` is also enabled. (Note: Diarization output is not directly rendered in the captions by this script, but enabling it can affect other results like paragraphing).
+*   `--max_caption_chars <int>`: (Optional, default: 100) Maximum characters per caption segment when processing utterances. This setting is IGNORED if `--paragraphs` is enabled (as paragraph mode uses sentence-based segmentation). 字幕分段最大字符数（处理utterances时生效），默认100。若启用 --paragraphs 则此设置无效。
+*   `--split_on_sentences`: (Optional, flag) When processing utterances, attempt to split segments at sentence endings (e.g., '.', '?', '!') if it generally respects `--max_caption_chars`. This setting is IGNORED if `--paragraphs` is enabled. 处理utterances时，尝试在句尾分割字幕。若启用 --paragraphs 则此设置无效。
 
 **Examples:**
 
@@ -89,6 +94,16 @@ python transcribe_audio.py [options] <audio_file_path(s)>
     python transcribe_audio.py dummy_audio.wav --format srt
     ```
     *(Output: `dummy_audio.srt` containing no actual speech captions, as the input is silent)*
+
+6.  **Transcribe with paragraph segmentation and diarization enabled:**
+    ```bash
+    python transcribe_audio.py my_long_talk.wav --paragraphs --diarize --format srt
+    ```
+
+7.  **Transcribe utterances with a max character limit per caption:**
+    ```bash
+    python transcribe_audio.py my_talk.wav --max_caption_chars 80 --format srt
+    ```
 
 ## Error Handling
 
